@@ -1,0 +1,4 @@
+// 通过完整层级穿透确保命中
+:deep(.arco-badge-dot) {
+    box-shadow: 0 0 0 0;
+}
