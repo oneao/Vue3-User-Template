@@ -2,6 +2,7 @@ import axios, { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestCo
 import { Message } from "@arco-design/web-vue";
 import { useRouterStore } from "@/store/router";
 import { useUserStore } from "@/store/user";
+import { ResponseStatusEnum, ResponseStatusErrorMessageEnum } from "@/types/enums"
 
 const buildBaseUrl = () => {
   const isProxy = import.meta.env.VITE_APP_PROXY === "Y";
@@ -30,23 +31,6 @@ const axiosInstance: AxiosInstance = axios.create({
   timeout: 0
 });
 
-type Response<T = unknown> = {
-  code: number;
-  message: string;
-  data: T;
-};
-
-enum ResponseStatus {
-  SUCCESS = 200,
-  ERROR = 500,
-  UNAUTHORIZED = 401,
-  RESOURCE_CREATED_SUCCESS = 201,
-  RESOURCE_CREATED_ERROR = 409
-}
-
-enum ErrorStatusMessage {
-  NO_LOGIN = "尚未登录，请先登录！"
-}
 
 // 请求拦截器
 axiosInstance.interceptors.request.use(
@@ -96,7 +80,7 @@ axiosInstance.interceptors.response.use(
       return Promise.reject();
     }
 
-    const resData = response.data as Response;
+    const resData = response.data as IResData;
 
     // 解析返回数据中的字段
     response.data.data = parseJsonOrReturnString(response.data.data);
@@ -109,7 +93,7 @@ axiosInstance.interceptors.response.use(
     } else if (resData.code >= 400 && resData.code <= 500) {
       Message.error(resData.message || "请求错误");
       switch (resData.code) {
-        case ResponseStatus.UNAUTHORIZED:
+        case ResponseStatusEnum.UNAUTHORIZED:
           if (routerStore.getCurrentPath() !== "/login") {
             userStore.clearUserInfo();
             routerStore.toPath("/login");
@@ -124,8 +108,8 @@ axiosInstance.interceptors.response.use(
   (error: AxiosError) => {
     // 网络错误处理
     switch (error.message) {
-      case ErrorStatusMessage.NO_LOGIN:
-        Message.error(ErrorStatusMessage.NO_LOGIN);
+      case ResponseStatusErrorMessageEnum.NO_LOGIN:
+        Message.error(ResponseStatusErrorMessageEnum.NO_LOGIN);
         break;
       default:
         // 其他情况提示网络错误

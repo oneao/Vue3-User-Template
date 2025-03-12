@@ -1,14 +1,7 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 
-type IUserInfo = {
-  id: string;
-  account?: string;
-  email?: string;
-  name?: string;
-  token?: string;
-  avatar?: string;
-};
+
 const initState = {
   id: "",
   account: "",
